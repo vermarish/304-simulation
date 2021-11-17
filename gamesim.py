@@ -20,7 +20,7 @@ def value(cards):
     Input a collection of cards and get the TOTAL value.
     """
     if isinstance(cards, tuple):  # single card
-        return(card[2])
+        return(cards[2])
     elif isinstance(cards, list):  # list of cards
         return(sum([card[2] for card in cards]))
     else:
@@ -37,6 +37,7 @@ class Player:
     self.name = None
     self.gs = None
     self.bidInFirstRound = None  # for use in makeSecondBid()
+    self.suitDic = {}
 
     def __init__(self):
         pass
@@ -87,6 +88,9 @@ class Player:
         Evaluate gs.table and self.hand,
         then make a move.
         """
+        
+
+
         # TODO write a function to get 
         #      all LEGAL moves available
         #      before making a decision
@@ -115,29 +119,121 @@ class SimplePlayer(Player):
     # so that before you implement them, SimplePlayer inherits
     # the naive decision functions from Player.
 
-    """TODO
-    def makeFirstBid(self):
-        # TODO write an external function for this.
-        pass
-    """
+    def getSuits(): 
+        suitDic = {"H": 0, "D": 0, "S": 0, "C": 0}
+        for hand in self.hand: 
+            s = suit(hand)
+            suitDic.update({s: suitDic.get(s) + 1})
 
-    """TODO
-    def makeSecondBid(self, gs):
-        # TODO write an external function for this.
-        pass
-    """
+        return suitDic 
+
+
+    # choose the hand with the largest number of rank of a certain number 
+    # if no majority in hand -- bet 160 
+    # if 3 out of four cards in hand are one trump suit -- bet 180 
+    # if 4 out of four cards in hand are one trump suit -- bet 210 
+    def makeFirstBidMaj(self): 
+        suitDic = getSuits()
+        maxSuit = max(suitDic, key=suitDic.get)
+        if (suitDic.get(maxSuit) <= 2):
+            return 160, maxSuit
+        elif (suitDic.get(maxSuit) == 3): 
+            return 180, maxSuit
+        else: 
+            return 210, maxSuit
+
     
-    """TODO
+    def makeFirstBidTop(self): 
+        suitDic = {"H": 0, "D": 0, "S": 0, "C": 0}
+        suitDicJack = {"H": False, "D": False, "S": False, "C": False}   #whether there is a jack of the trump suit in the hand 
+        suitDicNine = {"H": False, "D": False, "S": False, "C": False}   #whether there is a nine of the trump suit in the hand 
+        suitDicAce = {"H": False, "D": False, "S": False, "C": False}    #whether there is a ace of the trump suit in the hand
+
+        for hand in self.hand: 
+            r = rank(hand)
+            suitDic.update({r: suitDic.get(r) + 1})
+            s = suit(hand)
+            if (s == "J"):
+                suitDicJack.update({r: True})
+            elif (s == "9")
+                suitDicNine.update({r: True})
+            elif (s = "A"):
+                suitDicAce.update({r: True})
+
+        maxSuit = max(suitDic, key=suitDic.get)
+
+        if (suitDicJack.get(maxSuit) == True and suitDicNine.get(maxSuit) == True and suitDicAce.get(maxSuit) == True): 
+            return 230, maxSuit
+        elif (suitDicJack.get(maxSuit) == True and suitDicNine.get(maxSuit) == True): 
+            return 210, maxSuit 
+        elif (suitDicJack.get(maxSuit) == True and suitDicAce.get(maxSuit) == True): 
+            return 180, maxSuit
+        else: 
+            return 160, maxSuit 
+
+
+    def makeFirstBidValue(self):
+        suitDic getSuits()
+        maxSuit = max(suitDic, key=suitDic.get)
+        
+        if (suitDic.get(maxSuit) == 1): 
+            return 160, maxSuit
+
+        v = value(self.hand)
+
+        if (v <= ): 
+            return 160, maxSuit
+        elif (1 <= v <= 3): 
+            return 180, maxSuit
+        else: 
+            return 210, maxSuit
+    
+
+    def makeFirstBid(self):
+
+    
+    """TODO -- don't need because we handle it in bid function 
     def pickTrump(self):
         # TODO write an external function for this.
         pass
     """
 
-    """TODO
-    def makeMove(self, gs):
-        # TODO write an external function for this.
-        pass
-    """
+    
+    def makeMoveSmall(self, gs):
+        current = gs.table[-1]    ## gets the top card on the pile 
+        suit = suit(current)    ## suit of the top card 
+        suitDic = getSuits()    
+
+        if (suitDic.get(suit) > 0): #if the player has that suit in their hand 
+            
+
+        else (suitDic.get(suit) > 0): 
+
+
+    def makeMoveBig(self, gs): 
+        current = gs.table[-1]    ## gets the top card on the pile 
+        suit = suit(current)    ## suit of the top card 
+        suitDic = getSuits()    
+
+        if (suitDic.get(suit) > 0): #if the player has that suit in their hand 
+            
+            
+
+        else: 
+            if (not gs.trumpIsOpen):     
+                gs.trumpIsOpen = True   ## trump card is now open 
+            
+            if (suitDic.get(current) > 0): 
+                getSuits() 
+                
+                
+
+                
+
+            
+        
+    
+    
 
 class GameState:
     """
@@ -223,7 +319,7 @@ class GameManager:
         
         # SECOND ROUND OF BIDDING
         self.dealHalf()
-        gs.bids = [player.makeSecondBet(gs) for player in self.players]
+        ## gs.bids = [player.makeSecondBet(gs) for player in self.players]
         topBidder = players[gs.bids.index(max(gs.bids))]
         self.trumpSuit = topBidder.pickTrump()
         # Simplification: Each player comes up with a bid separately,
@@ -246,6 +342,9 @@ class GameManager:
                 teamTwoPool += gs.table
             gs.table = []
             startingPlayer = winningPlayer
+
+
+        
 
         # TODO compare value(teamOnePool) against teamOneBid
         #      compare value(teamTwoPool) against teamTwoBid
