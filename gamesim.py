@@ -198,7 +198,7 @@ class SimplePlayer(Player):
         pass
     """
 
-    
+
     def makeMoveSmall(self, gs):
         current = gs.table[-1]    ## gets the top card on the pile 
         suit = suit(current)    ## suit of the top card 
@@ -215,10 +215,40 @@ class SimplePlayer(Player):
         suit = suit(current)    ## suit of the top card 
         suitDic = getSuits()    
 
-        if (suitDic.get(suit) > 0): #if the player has that suit in their hand 
-            
-            
+        suitDicJack = {"H": False, "D": False, "S": False, "C": False}   #whether there is a jack of the trump suit in the hand 
+        suitDicNine = {"H": False, "D": False, "S": False, "C": False}   #whether there is a nine of the trump suit in the hand 
+        suitDicAce = {"H": False, "D": False, "S": False, "C": False}    #whether there is a ace of the trump suit in the hand
+        suitDicTen = {"H": False, "D": False, "S": False, "C": False}   #whether there is a jack of the trump suit in the hand 
+        suitDicQueen = {"H": False, "D": False, "S": False, "C": False}   #whether there is a nine of the trump suit in the hand 
+        suitDicKing = {"H": False, "D": False, "S": False, "C": False}    #whether there is a ace of the trump suit in the hand
+        suitDicSeven = {"H": False, "D": False, "S": False, "C": False}   #whether there is a nine of the trump suit in the hand 
+        suitDicEight = {"H": False, "D": False, "S": False, "C": False}    #whether there is a ace of the trump suit in the hand
 
+        for hand in self.hand: 
+            s = suit(hand)
+            if (s == "J"):
+                suitDicJack.update({r: True})
+            elif (s == "9")
+                suitDicNine.update({r: True})
+            elif (s = "A"):
+                suitDicAce.update({r: True})
+            elif (s = "10"): 
+                suitDicTen.update({r: True})
+            elif (s = "K"):
+                suitDicKing.update({r: True})
+            elif (s = "Q"):
+                suitDicQueen.update({r: True})
+            elif (s = "8"):
+                suitDicEight.update({r: True})
+            elif (s = "7"):
+                suitDicSeven.update({r: True})
+
+        if (suitDic.get(suit) > 0): #if the player has that suit in their hand 
+            if (suitDicJack.get(suit) == True): 
+                gs.table.append(hand)
+                suitDicJack.update({suit: False})
+                self.hand.remove(hand)
+            
         else: 
             if (not gs.trumpIsOpen):     
                 gs.trumpIsOpen = True   ## trump card is now open 
@@ -227,13 +257,11 @@ class SimplePlayer(Player):
                 getSuits() 
                 
                 
+                
 
                 
 
-            
         
-    
-    
 
 class GameState:
     """
@@ -344,6 +372,7 @@ class GameManager:
             startingPlayer = winningPlayer
 
 
+        
         
 
         # TODO compare value(teamOnePool) against teamOneBid
