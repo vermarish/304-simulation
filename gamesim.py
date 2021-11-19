@@ -347,6 +347,7 @@ class MajSmallPlayer(smallPlayer):
     def makeBid(self):
         suitDic = self.getSuits()
 
+        # returns the corresponding score and suit based on the number of cards in the ahnds 
         maxSuit = max(suitDic, key=suitDic.get)
         if (suitDic.get(maxSuit) <= 2):
             return 160, maxSuit
@@ -385,13 +386,16 @@ class TopSmallPlayer(smallPlayer):
         super().__init__()
 
     # makeBidTop
+    # choose the hand with the larger amount of high-cards ("J", "9", "A")
     def makeBid(self):
         suitDic = self.getSuits()
 
+        # creates dictionaries with each of the high-card ranks and the suits they are
         suitDicJack = {"H": False, "D": False, "S": False, "C": False}   #whether there is a jack of the trump suit in the hand 
         suitDicNine = {"H": False, "D": False, "S": False, "C": False}   #whether there is a nine of the trump suit in the hand 
         suitDicAce = {"H": False, "D": False, "S": False, "C": False}    #whether there is a ace of the trump suit in the hand
 
+        # updates the dictionaries above 
         for suit in suits: 
             if("J" in self.handsDic.get(suit)): 
                 suitDicJack.update({suit: True})
@@ -400,9 +404,10 @@ class TopSmallPlayer(smallPlayer):
             elif ("A" in self.handsDic.get(suit)):
                 suitDicAce.update({suit: True}) 
 
-
+        # finds the suit that has the max amount of cards 
         maxSuit = max(suitDic, key=suitDic.get)
 
+        ## returns the score and the suit 
         if (suitDicJack.get(maxSuit) == True and suitDicNine.get(maxSuit) == True and suitDicAce.get(maxSuit) == True): 
             return 230, maxSuit
         elif (suitDicJack.get(maxSuit) == True and suitDicNine.get(maxSuit) == True): 
@@ -420,6 +425,8 @@ class TopBigPlayer(bigPlayer):
         super().__init__()
 
     # makeBidTop
+
+    # choose the hand with the larger amount of high-cards ("J", "9", "A")
     def makeBid(self):
         suitDic = self.getSuits()
 
@@ -427,6 +434,7 @@ class TopBigPlayer(bigPlayer):
         suitDicNine = {"H": False, "D": False, "S": False, "C": False}   #whether there is a nine of the trump suit in the hand 
         suitDicAce = {"H": False, "D": False, "S": False, "C": False}    #whether there is a ace of the trump suit in the hand
 
+        # updates the dictionaries above 
         for suit in suits: 
             if("J" in self.handsDic.get(suit)): 
                 suitDicJack.update({suit: True})
@@ -435,9 +443,10 @@ class TopBigPlayer(bigPlayer):
             elif ("A" in self.handsDic.get(suit)):
                 suitDicAce.update({suit: True}) 
 
-
+        # finds the suit that has the max amount of cards
         maxSuit = max(suitDic, key=suitDic.get)
 
+        ## returns the score and the suit 
         if (suitDicJack.get(maxSuit) == True and suitDicNine.get(maxSuit) == True and suitDicAce.get(maxSuit) == True): 
             return 230, maxSuit
         elif (suitDicJack.get(maxSuit) == True and suitDicNine.get(maxSuit) == True): 
