@@ -172,6 +172,17 @@ class smallPlayer(Player):
             if (not gs.trumpIsOpen):     
                 gs.trumpIsOpen = True   ## trump card is now open 
                 suits = gs.trumpSuit
+
+                if (suitDic.get(suits) == 0): 
+                    if (suitDic.get("H") == 0):
+                        suits = "H"
+                    if (suitDic.get("D") == 0):
+                        suits = "D"
+                    if (suitDic.get("C") == 0):
+                        suits = "C"
+                    if (suitDic.get("S") == 0):
+                        suits = "S"
+                                
             
         cards = self.handsDic.get(suits)
        
@@ -269,7 +280,17 @@ class bigPlayer(Player):
             if (not gs.trumpIsOpen):     
                 gs.trumpIsOpen = True   ## trump card is now open 
                 suits = gs.trumpSuit
-            
+
+                if (suitDic.get(suits) == 0): 
+                    if (suitDic.get("H") == 0):
+                        suits = "H"
+                    if (suitDic.get("D") == 0):
+                        suits = "D"
+                    if (suitDic.get("C") == 0):
+                        suits = "C"
+                    if (suitDic.get("S") == 0):
+                        suits = "S"
+                                
         cards = self.handsDic.get(suits)
  
         if (isinstance(cards,list) and len(cards) != 0): 
