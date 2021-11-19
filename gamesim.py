@@ -1,4 +1,7 @@
 import random
+from matplotlib import pyplot as plt
+import numpy as np
+import seaborn as sns
 
 ## Create constants.
 PLAYER_NAMES = ["South", "East", "North", "West"]
@@ -37,50 +40,48 @@ class Player:
     hand = []
     name = None
     gs = None
-    suitDic = {}
-    handsDic = {}
-    ## self.handsDic = {"J": [], "9": [], "A": [], "10": [], "K": [], "Q": [], "8": [], "7": []}
-
+    suitDic = {}   # map suit to an integer count
+    handsDic = {}  # map suit to a list of ranks
 
     def __init__(self):
         self.handsDic = {"H": [], "D": [], "S": [], "C": []}
-        # FIXED: initialize handsDic with all possible cards.
-        for card in ALL_CARDS:
-            s = suit(card)
-            r = rank(card)
-            self.handsDic.get(s).append(r)
-        pass
+        self.suitDic = {"H": 0, "D": 0, "S": 0, "C": 0}
 
     def giveCards(self, cards):
-        if isinstance(cards, list):  # concatenate a list of cards
-            self.hand += cards
-        if isinstance(cards, tuple): # append a card
-            self.hand += [cards]
-        # TODO suitDic? handsDic?
+        if isinstance(cards, tuple):
+            cards = [cards]
+        # Now treat it as a list
+        self.hand += cards
+        for card in cards:
+            self.handsDic[suit(card)].append(rank(card))
+            self.suitDic[suit(card)] += 1
 
     """The player plays a card, moving it from their hand to the table"""
     def playCard(self, card):
         self.hand.remove(card)
+        self.handsDic[suit(card)].remove(rank(card))
+        self.suitDic[suit(card)] -= 1
         self.gs.table += [card]
-        # TODO suitDic? handsDic?
+
 
     """Remove all cards from a player's hand"""
     def clearHand(self):
         self.hand = []
-        # TODO suitDic? handsDic?
+        self.handsDic = {"H": [], "D": [], "S": [], "C": []}
+        self.suitDic = {"H": 0, "D": 0, "S": 0, "C": 0}
 
     """Set a players hand to the given list of cards"""
     def setHand(self, cards):
-        self.clearHand
+        self.clearHand()
         self.giveCards(cards)
 
     """Count the distribution of the four suits in your hand"""
     def getSuits(self):
-        suitDic = {"H": 0, "D": 0, "S": 0, "C": 0}
-        for s in suits:
-            suitDic.update({s: len(self.handsDic.get(s))})
-
-        return(suitDic)
+        #suitDic = {"H": 0, "D": 0, "S": 0, "C": 0}
+        #for s in suits:
+        #    suitDic.update({s: len(self.handsDic.get(s))})
+        #return(suitDic)
+        return(self.suitDic)
 
     ## Decisions for child classes to make
     ## This parent class makes naive decisions.
@@ -125,6 +126,7 @@ class Player:
 class smallPlayer(Player): 
     def __init__(self):
         super().__init__()
+
 
     # makeMoveSmall
     def makeMove(self, gs):
@@ -216,6 +218,7 @@ class smallPlayer(Player):
             suitDicJack.update({suit: False})
             self.handsDic.get(suit).remove("8")
             self.hand.remove(hand)
+
 
 class bigPlayer(Player): 
     def __init__(self):
@@ -700,8 +703,28 @@ class ValueBigPlayer(bigPlayer):
     #         self.handsDic.get(suit).remove("8")
     #         self.hand.remove(hand)
 
-            
-                
+
+class TestPlayer(Player):
+    def __init__(self):
+        super().__init__()
+
+    # makeBidValue
+    def makeBid(self):
+        suitDic = self.getSuits()
+        maxSuit = max(suitDic, key=suitDic.get)
+
+        if (suitDic.get(maxSuit) == 1):
+            return 160, maxSuit
+
+        v = value(self.hand)
+
+        if (v <= 30):
+            return 160, maxSuit
+        elif (1 <= v <= 3):
+            return 180, maxSuit
+        else:
+            return 210, maxSuit
+
 class GameState:
     """
     All the things which every player can see:
@@ -723,11 +746,11 @@ class GameState:
         for i, card in enumerate(self.table):
             points = value(card)
             if self.trumpIsOpen and suit(card) == self.trumpSuit:
-                points *= 1000  # matching an open trump is valuable.
+                points *= 1000  # matching an open trump with a non-zero card is valuable.
             elif suit(card) != suit(self.table[0]):
                 points *= 0  # failing to match the suit is useless.
             elif i == 0:
-                points = 0.01
+                points += 0.01  # break ties by giving to the starting player
             arbitraryPoints.append(points)
         return(arbitraryPoints.index(max(arbitraryPoints)))
 
@@ -742,7 +765,8 @@ class GameState:
 
 class GameManager:
     def __init__(self, verbose=False):
-        self.players = [MajSmallPlayer(), MajSmallPlayer(), MajSmallPlayer(), MajSmallPlayer()]
+        # self.players = [MajSmallPlayer(), MajSmallPlayer(), MajSmallPlayer(), MajSmallPlayer()]
+        self.players = [TestPlayer(), TestPlayer(), TestPlayer(), TestPlayer()]
         for i in range(4):
             self.players[i].name = PLAYER_NAMES[i]
         self.verbose = verbose
@@ -788,6 +812,10 @@ class GameManager:
         self.gs.bids = [player.makeBid() for player in self.players]
         self.gs.bidVals = [bid[0] for bid in self.gs.bids]
 
+
+        # This line breaks ties by letting North go first.
+        # When everyone bids the same value, this introduces significant bias.
+        # Replace with topBidderIndex = random.randint(0,3) to investigate this.
         topBidderIndex = self.gs.bidVals.index(max(self.gs.bidVals))
         topBidder = self.players[topBidderIndex]
 
@@ -795,7 +823,8 @@ class GameManager:
 
         # Simplification: No point in declaring a trump on the first bidding round.
         # The topBidder may pick their trump from 8 cards.
-        self.trumpSuit = topBidder.pickTrump()
+
+        self.trumpSuit = self.gs.bids[topBidderIndex][1]
 
 
 
@@ -835,7 +864,7 @@ class GameManager:
             currentPlayer.makeMove(self.gs)
 
         winningPlayerIndex = playerOrder[self.gs.getIndexOfWinningCard()]
-        winningPlayer = self.players[winningPlayerIndex]
+        # winningPlayer = self.players[winningPlayerIndex]
 
         return(winningPlayerIndex)
 
@@ -859,8 +888,82 @@ class GameManager:
             tokens = -2
         return(tokens)
 
+"""Given a scoreboard, compute an array of the # of tokens earned by team 1 at each step"""
+def computeTransactions(scoreboard):
+    n = len(scoreboard[0])
+    return [scoreboard[0][i] - scoreboard[1][i] for i in range(n)]
 
+
+def running_averages(ts):  # given a time series, compute the running average measured at each time increment
+    sum = 0
+    averageSeries = []
+    for i, x in enumerate(ts):
+        sum += x
+        n_samples = i + 1
+        averageSeries.append(sum/n_samples)
+    return(averageSeries)
+
+
+## EXPERIMENT PHASE 1: which strategy performs the best?
+# TODO
+#
+#
+
+## EXPERIMENT PHASE 2: let's dig deeper into one particular strategy.
+N_GAMES = 5000
+
+N_EXPERIMENTS = 10
+
+"""
 gm = GameManager()
-for i in range(10):
+for i in range(N_GAMES):
     gm.runGame()
-print(gm.scoreboard)
+transactions = computeTransactions(gm.scoreboard)  # number of tokens team 1 receives in each game
+expected_outcome = sum(transactions)/N_GAMES
+print(f"Expected outcome: {expected_outcome}")
+
+
+## Plot the convergence
+for i in range(N_EXPERIMENTS):
+    gm = GameManager()
+    for g in range(N_GAMES):
+        gm.runGame()
+    transactions = computeTransactions(gm.scoreboard)
+    plt.plot(range(N_GAMES), running_averages(transactions), linewidth=1)
+#plt.hlines(y=[0, expected_outcome], xmin=[-N_GAMES, 0], xmax=[2*N_GAMES, N_GAMES], colors=["#BBBBBB","red"], linestyles=["solid", "dashed"])
+plt.hlines(y=0, xmin=-N_GAMES, xmax=[2*N_GAMES], colors="#BBBBBB", linestyles="solid")
+#plt.vlines(x=0, ymin=-20, ymax=20, colors="#BBBBBB")
+plt.title(f"Convergence of the measured average token gain\n{N_GAMES} simulations each in {N_EXPERIMENTS} experiments", fontsize=16)
+plt.xlabel("# of simulated games", fontsize=14)
+plt.ylabel("Measured average token gain", fontsize=14)
+plt.xlim(-3/1000*N_GAMES, N_GAMES)
+plt.ylim(-6,6)
+plt.show()
+
+## Plot a discrete histogram of outcomes
+sns.histplot(transactions, discrete=True, binrange=(-8,8), stat="density")
+plt.xticks(range(-8,8+2,2), range(-8,8+2,2))
+plt.title("Empirical distribution of outcomes for Team 1", fontsize=16)
+plt.xlabel("Possible outcome", fontsize=14)
+plt.ylabel("Empirical Probability", fontsize=14)
+plt.show()
+
+
+
+## Plot a continuous histogram of average outcomes
+N_EXPERIMENTS = 500
+N_GAMES = 500
+means = []
+for i in range(N_EXPERIMENTS):
+    gm = GameManager()
+    for g in range(N_GAMES):
+        gm.runGame()
+    transactions = computeTransactions(gm.scoreboard)
+    means.append(sum(transactions)/N_GAMES)
+sns.histplot(means, stat="density")
+plt.xlabel("Expected value", fontsize=14)
+plt.ylabel("Probability density", fontsize=14)
+plt.title("Empirical sampling distribution of mean outcomes for Team 1\n500 measurements of sample means with n=500", fontsize=16)
+plt.show()
+
+"""
