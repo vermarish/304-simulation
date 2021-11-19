@@ -7,7 +7,7 @@ ranks = ["J", "9", "A", "10", "K", "Q", "8", "7"]
 suits = ["H", "D", "S", "C"]
 values = [30, 20, 11, 10, 3, 2, 0, 0]
 ALL_CARDS = {(r,s,values[i]) for i, r in enumerate(ranks) for s in suits}
-del ranks; del suits; del values
+# del ranks; del suits; del values
 
 
 ## Avoid index hell.
@@ -34,39 +34,61 @@ class Player:
     Keeps track of cards in the player's hand.
     """
 
-    self.hand = []
-    self.name = None
-    self.gs = None
-    self.bidInFirstRound = None  # for use in makeSecondBid()
-    self.suitDic = {}
+    hand = []
+    name = None
+    gs = None
+    suitDic = {}
+    handsDic = {}
     ## self.handsDic = {"J": [], "9": [], "A": [], "10": [], "K": [], "Q": [], "8": [], "7": []}
-    self.handsDic = {"H": [], "D": [], "S": [], "E": []}
-    for hand in hands: 
-        s = suit(hand)
-        r = rank(hand) 
-        self.handsDic.update({s: self.handsDic.get(s).append(r)})
+
 
     def __init__(self):
+        self.handsDic = {"H": [], "D": [], "S": [], "C": []}
+        # FIXED: initialize handsDic with all possible cards.
+        for card in ALL_CARDS:
+            s = suit(card)
+            r = rank(card)
+            self.handsDic.get(s).append(r)
         pass
 
     def giveCards(self, cards):
-        if isinstance(cards, list):
+        if isinstance(cards, list):  # concatenate a list of cards
             self.hand += cards
-        if isinstance(cards, tuple):
+        if isinstance(cards, tuple): # append a card
             self.hand += [cards]
+        # TODO suitDic? handsDic?
 
+    """The player plays a card, moving it from their hand to the table"""
     def playCard(self, card):
-        self.cards.remove(card)
-        gs.table += [card]
+        self.hand.remove(card)
+        self.gs.table += [card]
+        # TODO suitDic? handsDic?
 
+    """Remove all cards from a player's hand"""
+    def clearHand(self):
+        self.hand = []
+        # TODO suitDic? handsDic?
+
+    """Set a players hand to the given list of cards"""
+    def setHand(self, cards):
+        self.clearHand
+        self.giveCards(cards)
+
+    def getSuits(self):
+        suitDic = {"H": 0, "D": 0, "S": 0, "C": 0}
+        for s in suits:
+            suitDic.update({s: len(self.handsDic.get(s))})
+
+        return(suitDic)
 
     ## Decisions for child classes to make
     ## This parent class makes naive decisions.
-    ## 
+    ##
     ## DO NOT WASTE YOUR TIME trying to improve these.
-    ## These are just placeholders so that the code can 
+    ## These are just placeholders so that the code can
     ## run without actually implementing each decision.
-    def makeFirstBid(self):
+
+    def makeBid(self):
         """
         Evaluate the 4 cards in self.hand,
         then make a bid between 160 and 200.
@@ -75,13 +97,6 @@ class Player:
         self.bidInFirstRound = bid
         return(bid)
 
-    def makeSecondBid(self, gs):
-        """
-        Evaluate the 8 cards in self.hand
-                 and maybe also self.gs,
-        then decide whether to raise the your bid to 250.
-        """
-        return(self.bidInFirstRound)
 
     def pickTrump(self):
         """
@@ -96,22 +111,15 @@ class Player:
         then make a move.
         """
 
-        # TODO write a function to get 
+        # TODO write a function to get
         #      all LEGAL moves available
         #      before making a decision
         # TODO you also need to consider opening
         #      the trump in this function.
-        playCard(self.hand[0])
-    
+        self.playCard(self.hand[0])
+
     def __str__(self):
-        return(f"Name: {name}\nHand:{hand}", self.name, self.hand)
-
-    def getSuits(): 
-        suitDic = {"H": 0, "D": 0, "S": 0, "C": 0}
-        for suit in suits: 
-            suitDic.update({suit: len(self.handsDic.get(suit))})
-
-        return suitDic 
+        return(f"Name: {self.name}\nHand:{self.hand}")
 
 class smallPlayer(Player): 
     def __init__(self):
@@ -120,8 +128,8 @@ class smallPlayer(Player):
     
     def makeMoveSmall(self, gs):
         current = gs.table[-1]    ## gets the top card on the pile 
-        suit = suit(current)    ## suit of the top card 
-        suitDic = getSuits()   
+        suit = suit(current)    ## suit of the top card
+        suitDic = self.getSuits()
          
 
         # suitDicJack = {"H": False, "D": False, "S": False, "C": False}   #whether there is a jack of the trump suit in the hand 
@@ -215,7 +223,7 @@ class bigPlayer(Player):
     def makeMoveBig(self, gs): 
         current = gs.table[-1]    ## gets the top card on the pile 
         suit = suit(current)    ## suit of the top card 
-        suitDic = getSuits()   
+        suitDic = self.getSuits()
 
         if (suitDic.get(suit) == 0): #if the player does not have that suit in their hand 
             if (not gs.trumpIsOpen):     
@@ -278,12 +286,13 @@ class MajSmallPlayer(smallPlayer):
     def __init__(self):
         super().__init__()
 
+    # makeBidMaj
     # choose the hand with the largest number of rank of a certain number 
     # if no majority in hand -- bet 160 
     # if 3 out of four cards in hand are one trump suit -- bet 180 
     # if 4 out of four cards in hand are one trump suit -- bet 210 
-    def makeFirstBidMaj(self): 
-        suitDic = getSuits()
+    def makeBid(self):
+        suitDic = self.getSuits()
 
         maxSuit = max(suitDic, key=suitDic.get)
         if (suitDic.get(maxSuit) <= 2):
@@ -299,12 +308,13 @@ class MajBigPlayer(bigPlayer):
     def __init__(self):
         super().__init__()
 
+    # makeBidMaj
     # choose the hand with the largest number of rank of a certain number 
     # if no majority in hand -- bet 160 
     # if 3 out of four cards in hand are one trump suit -- bet 180 
     # if 4 out of four cards in hand are one trump suit -- bet 210 
-    def makeFirstBidMaj(self): 
-        suitDic = getSuits()
+    def makeBid(self):
+        suitDic = self.getSuits()
 
         maxSuit = max(suitDic, key=suitDic.get)
         if (suitDic.get(maxSuit) <= 2):
@@ -320,9 +330,10 @@ class MajBigPlayer(bigPlayer):
 class TopSmallPlayer(smallPlayer):
     def __init__(self):
         super().__init__()
-    
-    def makeFirstBidTop(self): 
-        suitDic = getSuits() 
+
+    # makeBidTop
+    def makeBid(self):
+        suitDic = self.getSuits()
 
         suitDicJack = {"H": False, "D": False, "S": False, "C": False}   #whether there is a jack of the trump suit in the hand 
         suitDicNine = {"H": False, "D": False, "S": False, "C": False}   #whether there is a nine of the trump suit in the hand 
@@ -355,8 +366,9 @@ class TopBigPlayer(bigPlayer):
     def __init__(self):
         super().__init__()
 
-    def makeFirstBidTop(self): 
-        suitDic = getSuits() 
+    # makeBidTop
+    def makeBid(self):
+        suitDic = self.getSuits()
 
         suitDicJack = {"H": False, "D": False, "S": False, "C": False}   #whether there is a jack of the trump suit in the hand 
         suitDicNine = {"H": False, "D": False, "S": False, "C": False}   #whether there is a nine of the trump suit in the hand 
@@ -388,8 +400,9 @@ class ValueSmallPlayer(smallPlayer):
     def __init__(self):
         super().__init__()
 
-    def makeFirstBidValue(self):
-        suitDic =  getSuits()
+    # makeBidValue
+    def makeBid(self):
+        suitDic =  self.getSuits()
         maxSuit = max(suitDic, key=suitDic.get)
         
         if (suitDic.get(maxSuit) == 1): 
@@ -410,8 +423,9 @@ class ValueBigPlayer(bigPlayer):
     def __init__(self):
         super().__init__()
 
-    def makeFirstBidValue(self):
-        suitDic =  getSuits()
+    # makeBidValue
+    def makeBid(self):
+        suitDic =  self.getSuits()
         maxSuit = max(suitDic, key=suitDic.get)
         
         if (suitDic.get(maxSuit) == 1): 
@@ -426,28 +440,7 @@ class ValueBigPlayer(bigPlayer):
             return 180, maxSuit
         else: 
             return 210, maxSuit
-  
 
-###############################
-
-    # IMPORTANT:
-    # To implement these decision functions,
-    # create an external function and pass the necessary
-    # parameters into it.
-    # 
-    # This way, two players can share particular strategies
-    # without reusing code.
-    #
-    # For now, I have each decision function commented out
-    # so that before you implement them, SimplePlayer inherits
-    # the naive decision functions from Player.
-
-    def getSuits(): 
-        suitDic = {"H": 0, "D": 0, "S": 0, "C": 0}
-        for suit in suits: 
-            suitDic.update({suit: len(self.handsDic.get(suit))})
-
-        return suitDic 
 
 
     # choose the hand with the largest number of rank of a certain number 
@@ -738,42 +731,44 @@ class GameState:
         self.table = []
 
     def __str__(self):
-        return(f"table: {table}\ntrump: {trumpSuit}\ntrump is revealed: {trumpIsOpen}")
+        return(f"table: {self.table}\ntrump: {self.trumpSuit}\ntrump is revealed: {self.trumpIsOpen}")
 
     
 
 
 class GameManager:
     def __init__(self, verbose=False):
-        self.players = [SimplePlayer(), SimplePlayer(), SimplePlayer(), SimplePlayer()]
+        self.players = [MajSmallPlayer(), MajSmallPlayer(), MajSmallPlayer(), MajSmallPlayer()]
         for i in range(4):
-            players[i].name = PLAYER_NAMES[i]
+            self.players[i].name = PLAYER_NAMES[i]
         self.verbose = verbose
-        self.reset()
-        self.scoreboard = []  # this can be a 2-D array with 
-                              # two rows and lots of columns
-                              # to store the outcome of each game
-                              # for eventual data analysis.
+        self.reset() # create the deck
+        self.scoreboard = [[],[]]  # a 2-D array with two rows and lots of columns
+                                   # to store the outcome of each game for eventual
+                                   # data analysis.
+
 
     def newGameState(self):
         gs = GameState()
         for i in range(4):
-            players[i].gs = gs
+            self.players[i].gs = gs
         self.gs = gs
 
 
+    # Helper method
     # Deal 16 cards from the deck to the 4 players.
     def dealHalf(self):
-        for i, player in enumerate(players):
-            player.giveCards(deck[i*4:i*4+4])
-        del deck[0:16]
+        for i, player in enumerate(self.players):
+            player.giveCards(self.deck[i*4:i*4+4])
+        del self.deck[0:16]
 
+    # Helper method
     # Clear the table, take each player's cards,
     # and shuffle the deck.
     def reset(self):
         self.newGameState()
         for player in self.players:
-            player.setHand([])
+            player.clearHand()
         self.deck = [card for card in ALL_CARDS]
         random.shuffle(self.deck)
 
@@ -782,59 +777,86 @@ class GameManager:
         self.reset()
         self.dealHalf()
 
-        # FIRST ROUND OF BIDDING
-        # Simplification: Everyone makes the first bid simultaneously
-        # (no mind-games with the opponent bids.)
-        gs.bids = [player.makeFirstBet() for player in self.players]
-        
-        # Simplification: No point in declaring a trump on the first bidding round.
-        
-        # SECOND ROUND OF BIDDING
+        # BIDDING
+        # Simplification: Everyone makes their bid simultaneously
+        # (no mind-games with the opponent's bids.)
+        # a bid is a (val, suit) where that suit is what the player wants to play.
+        self.gs.bids = [player.makeBid() for player in self.players]
+        self.gs.bidVals = [bid[0] for bid in self.gs.bids]
+
+        topBidderIndex = self.gs.bidVals.index(max(self.gs.bidVals))
+        topBidder = self.players[topBidderIndex]
+
         self.dealHalf()
-        ## gs.bids = [player.makeSecondBet(gs) for player in self.players]
-        topBidder = players[gs.bids.index(max(gs.bids))]
+
+        # Simplification: No point in declaring a trump on the first bidding round.
+        # The topBidder may pick their trump from 8 cards.
         self.trumpSuit = topBidder.pickTrump()
+
+
+
         # Simplification: Each player comes up with a bid separately,
         # and each team uses the higher bid.
-        teamOneBid = max(self.bids[0], self.bids[2])
-        teamTwoBid = max(self.bids[1], self.bids[3])
+        teamOneBid = max(self.gs.bids[0], self.gs.bids[2])
+        teamTwoBid = max(self.gs.bids[1], self.gs.bids[3])
         
 
         # PLAYING
-        # (this section has not been tested yet)
         teamOnePool = []
         teamTwoPool = []
 
-        startingPlayer = topBidder
+
+        startingPlayerIndex = topBidderIndex
         for rounds in range(8):
-            winningPlayer, winningPlayerIndex = round(startingPlayer)
+            winningPlayerIndex = self.round(startingPlayerIndex)
             if winningPlayerIndex in [0,2]:
-                teamOnePool += gs.table
+                teamOnePool += self.gs.table
             else:
-                teamTwoPool += gs.table
-            gs.table = []
-            startingPlayer = winningPlayer
+                teamTwoPool += self.gs.table
+            self.gs.table = []
+            startingPlayerIndex = winningPlayerIndex
 
+        # SCORING
+        self.scoreboard[0].append(self.score(teamOnePool, teamOneBid))
+        self.scoreboard[1].append(self.score(teamTwoPool, teamTwoBid))
 
-        
-        
-
-        # TODO compare value(teamOnePool) against teamOneBid
-        #      compare value(teamTwoPool) against teamTwoBid
-        #      mark the correct number of points on the scoreboard.
-        
-
-    def round(startingPlayer):
+    # Helper method
+    def round(self, startingPlayerIndex):
         # e.g. topBidder = 2 -> playerOrder = [2,3,0,1]
-        playerOrder = [position % 4 for position in range(startingPlayer, startingPlayer + 4)]
+        playerOrder = [position % 4 for position in range(startingPlayerIndex, startingPlayerIndex + 4)]
 
         # Everyone goes
         for i in range(4):
             currentPlayer = self.players[playerOrder[i]]
             currentPlayer.makeMove(self.gs)
 
-        winningPlayerIndex = playerOrder[gs.getIndexOfWinningCard()]
+        winningPlayerIndex = playerOrder[self.gs.getIndexOfWinningCard()]
         winningPlayer = self.players[winningPlayerIndex]
 
-        return(winningPlayer, winningPlayerIndex)
+        return(winningPlayerIndex)
 
+
+    # Helper method
+    def getPlayerIndex(self, targetPlayer):
+        for i, player in enumerate(self.players):
+            if player == targetPlayer:
+                return(i)
+        raise RuntimeError("This player isn't even part of the game?!")
+
+    # Helper method
+    def score(self, cardPool, bid):
+        val = value(cardPool)
+        if (val >= bid):
+            if (val > 200):
+                tokens = 4
+            else:
+                tokens = 2
+        else: # val < bid
+            tokens = -2
+        return(tokens)
+
+
+gm = GameManager()
+for i in range(10):
+    gm.runGame()
+print(gm.scoreboard)
