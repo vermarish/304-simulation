@@ -817,17 +817,15 @@ class GameState:
     def __str__(self):
         return(f"table: {self.table}\ntrump: {self.trumpSuit}\ntrump is revealed: {self.trumpIsOpen}")
 
-    
 
 
 class GameManager:
-    def __init__(self, players, verbose=False):
-        # self.players = [MajSmallPlayer(), MajSmallPlayer(), MajSmallPlayer(), MajSmallPlayer()]
-        # self.players = [TestPlayer(), TestPlayer(), TestPlayer(), TestPlayer()]
+    def __init__(self, players=None):
+        if players is None:
+            players = [TestPlayer(), TestPlayer(), TestPlayer(), TestPlayer()]
         self.players = players
         for i in range(4):
             self.players[i].name = PLAYER_NAMES[i]
-        self.verbose = verbose
         self.reset() # create the deck
         self.scoreboard = [[],[]]  # a 2-D array with two rows and lots of columns
                                    # to store the outcome of each game for eventual
@@ -868,13 +866,11 @@ class GameManager:
         # a bid is a (val, suit) where that suit is what the player wants to play.
         self.gs.bids = [player.makeBid() for player in self.players]
         self.gs.bidVals = [bid[0] for bid in self.gs.bids]
+        topBid = max(self.gs.bidVals)
 
-
-        # This line breaks ties by letting North go first.
-        # When everyone bids the same value, this introduces significant bias.
-        # Replace with topBidderIndex = random.randint(0,3) to investigate this.
-        topBidderIndex = self.gs.bidVals.index(max(self.gs.bidVals))
-        topBidder = self.players[topBidderIndex]
+        # if multiple players have the same top bid, break ties randomly
+        topBidderIndices = [i for i in range(4) if self.gs.bidVals[i] == topBid]
+        topBidderIndex = random.choice(topBidderIndices)
 
         self.dealHalf()
 
@@ -909,6 +905,12 @@ class GameManager:
         # SCORING
         self.scoreboard[0].append(self.score(teamOnePool, teamOneBid))
         self.scoreboard[1].append(self.score(teamTwoPool, teamTwoBid))
+
+    def runGames(self, n):
+        if (n <= 0):
+            raise ValueError("Number of games cannot be negative")
+        for i in range(n):
+            self.runGame()
 
     # Helper method
     def round(self, startingPlayerIndex):
@@ -945,10 +947,14 @@ class GameManager:
             tokens = -2
         return(tokens)
 
-"""Given a scoreboard, compute an array of the # of tokens earned by team 1 at each step"""
-def computeTransactions(scoreboard):
-    n = len(scoreboard[0])
-    return [scoreboard[0][i] - scoreboard[1][i] for i in range(n)]
+    """Given a scoreboard, compute an array of the # of tokens earned by team 1 at each step"""
+    def computeTransactions(self):
+        n = len(self.scoreboard[0])
+        return [self.scoreboard[0][i] - self.scoreboard[1][i] for i in range(n)]
+
+    def expectedOutcome(self):
+        transactions = self.computeTransactions()
+        return(sum(transactions) / len(transactions))
 
 
 def running_averages(ts):  # given a time series, compute the running average measured at each time increment
@@ -1005,16 +1011,60 @@ playersTSVS = [TopBigPlayer(), ValueSmallPlayer(), TopBigPlayer(), ValueSmallPla
 allPlayerStrategies = [playersMSMB,playersTSTB,playersVSVB,playersMSTS,playersMSVS,playersTSVS,
 playersMBTB,playersMBVB,playersTBVB,playersMSTS,playersMSVS,playersTSVS,playersMSTS,playersMSVS,playersTSVS]
 
+
+
+def createPlayerFromIndex(i):
+    if i==0:
+        return MajSmallPlayer()
+    elif i==1:
+        return MajBigPlayer()
+    elif i==2:
+        return TopSmallPlayer()
+    elif i==3:
+        return TopBigPlayer()
+    elif i==4:
+        return ValueSmallPlayer()
+    elif i==5:
+        return ValueBigPlayer()
+    else:
+        return None
+
+count = 0
+experimentResults = []
+N_GAMES = 5000
+for i in range(6):
+    experimentResults.append([])
+    for j in range(6):
+        playerSet = [createPlayerFromIndex(i),
+                     createPlayerFromIndex(j),
+                     createPlayerFromIndex(i),
+                     createPlayerFromIndex(j)]
+
+        gm = GameManager(playerSet)
+        gm.runGames(N_GAMES)
+        expected_outcome = gm.expectedOutcome()
+
+        experimentResults[i].append(expected_outcome)
+
+for row in experimentResults:
+    line = " ".join([str(round(val,3)) for val in row])
+    print(line)
+
+
+
+
+
+
+
 ## EXPERIMENT PHASE 2: let's dig deeper into one particular strategy.
 N_GAMES = 5000
 N_EXPERIMENTS = 10
 
 gm = GameManager([MajBigPlayer(), MajSmallPlayer(), MajBigPlayer(), MajSmallPlayer()])
-for i in range(N_GAMES):
-    gm.runGame()
-transactions = computeTransactions(gm.scoreboard)  # number of tokens team 1 receives in each game
-expected_outcome = sum(transactions)/N_GAMES
+gm.runGames(N_GAMES)
+expected_outcome = gm.expectedOutcome()
 print(f"Expected outcome: {expected_outcome}")
+print()
 
 """
 
