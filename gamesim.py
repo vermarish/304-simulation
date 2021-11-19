@@ -1,10 +1,10 @@
 import random
-from matplotlib import pyplot as plt
+##from matplotlib import pyplot as plt
 import numpy as np
-import seaborn as sns
+## import seaborn as sns
 
 ## Create constants.
-PLAYER_NAMES = ["South", "East", "North", "West"]
+PLAYER_NAMES = ["South", "East", "North", "West"]  
 ALL_CARDS = {}
 ranks = ["J", "9", "A", "10", "K", "Q", "8", "7"]
 suits = ["H", "D", "S", "C"]
@@ -14,10 +14,14 @@ ALL_CARDS = {(r,s,values[i]) for i, r in enumerate(ranks) for s in suits}
 
 
 ## Avoid index hell.
+
+# returns rank of a card 
 def rank(card):
     return(card[0])
+# returns suit of a card
 def suit(card):
     return(card[1])
+# returns value of a card/set of cards
 def value(cards):
     """
     Input one card and get its value.
@@ -37,15 +41,16 @@ class Player:
     Keeps track of cards in the player's hand.
     """
 
-    hand = []
+    hand = []   
     name = None
     gs = None
     suitDic = {}   # map suit to an integer count
     handsDic = {}  # map suit to a list of ranks
 
     def __init__(self):
-        self.handsDic = {"H": [], "D": [], "S": [], "C": []}
-        self.suitDic = {"H": 0, "D": 0, "S": 0, "C": 0}
+        self.handsDic = {"H": [], "D": [], "S": [], "C": []}  #dictionary storing all cards of a certain suit
+        self.suitDic = {"H": 0, "D": 0, "S": 0, "C": 0}  #dictionary storing distribution of each suit 
+
 
     def giveCards(self, cards):
         if isinstance(cards, tuple):
@@ -130,94 +135,96 @@ class smallPlayer(Player):
 
     # makeMoveSmall
     def makeMove(self, gs):
-        current = gs.table[-1]    ## gets the top card on the pile 
-        suit = suit(current)    ## suit of the top card
+        current = ""    ## gets the top card on the pile 
+        suits = ""    ## suit of the top card
+        
+        if (len(gs.table) == 0):  #checks to see if a card has been played
+            hand = ()     
+            # 
+            for s in self.handsDic.keys():
+                if ("8" in self.handsDic.get(s)): 
+                    hand = ("8",s,0)
+                elif ("7" in self.handsDic.get(s)): 
+                    hand = ("7",s,0)
+                elif ("K" in self.handsDic.get(s)): 
+                    hand = ("K",s,3)
+                elif ("Q" in self.handsDic.get(s)): 
+                    hand = ("Q",s,2)
+                elif ("10" in self.handsDic.get(s)): 
+                    hand = ("10",s,10)
+                elif ("A" in self.handsDic.get(s)): 
+                    hand = ("A",s,11)
+                elif ("9" in self.handsDic.get(s)): 
+                    hand = ("9",s,20)
+                elif ("J" in self.handsDic.get(s)): 
+                    hand = ("J",s,30)
+            current = hand 
+            suits = suit(current)
+                
+        else:
+            current = gs.table[-1]    ## gets the top card on the pile 
+            suits = suit(current)    ## suit of the top card
+
         suitDic = self.getSuits()
          
 
-        # suitDicJack = {"H": False, "D": False, "S": False, "C": False}   #whether there is a jack of the trump suit in the hand 
-        # suitDicNine = {"H": False, "D": False, "S": False, "C": False}   #whether there is a nine of the trump suit in the hand 
-        # suitDicAce = {"H": False, "D": False, "S": False, "C": False}    #whether there is a ace of the trump suit in the hand
-        # suitDicTen = {"H": False, "D": False, "S": False, "C": False}   #whether there is a jack of the trump suit in the hand 
-        # suitDicQueen = {"H": False, "D": False, "S": False, "C": False}   #whether there is a nine of the trump suit in the hand 
-        # suitDicKing = {"H": False, "D": False, "S": False, "C": False}    #whether there is a ace of the trump suit in the hand
-        # suitDicSeven = {"H": False, "D": False, "S": False, "C": False}   #whether there is a nine of the trump suit in the hand 
-        # suitDicEight = {"H": False, "D": False, "S": False, "C": False}    #whether there is a ace of the trump suit in the hand
-
-        # for hand in self.hand: 
-        #     s = suit(hand)
-        #     if (s == "J"):
-        #         suitDicJack.update({r: True})
-        #     elif (s == "9")
-        #         suitDicNine.update({r: True})
-        #     elif (s = "A"):
-        #         suitDicAce.update({r: True})
-        #     elif (s = "10"): 
-        #         suitDicTen.update({r: True})
-        #     elif (s = "K"):
-        #         suitDicKing.update({r: True})
-        #     elif (s = "Q"):
-        #         suitDicQueen.update({r: True})
-        #     elif (s = "8"):
-        #         suitDicEight.update({r: True})
-        #     elif (s = "7"):
-        #         suitDicSeven.update({r: True})
-
-        if (suitDic.get(suit) == 0): #if the player does not have that suit in their hand 
+        if (suitDic.get(suits) == 0): #if the player does not have that suit in their hand 
             if (not gs.trumpIsOpen):     
                 gs.trumpIsOpen = True   ## trump card is now open 
-                suit = self.trumpSuit
+                suits = gs.trumpSuit
             
-        cards = self.handsDic.get(suit)
+        cards = self.handsDic.get(suits)
+       
 
-        if ("J" in cards): 
-            hand = ("J",suit,30)
-            gs.table.append(hand)
-            suitDicJack.update({suit: False})
-            self.handsDic.get(suit).remove("J")
-            self.hand.remove(hand)
-        elif ("9" in cards): 
-            hand = ("9",suit,20)
-            gs.table.append(hand)
-            suitDicJack.update({suit: False})
-            self.handsDic.get(suit).remove("9")
-            self.hand.remove(hand)
-        elif ("A" in cards): 
-            hand = ("A",suit,11)
-            gs.table.append(hand)
-            suitDicJack.update({suit: False})
-            self.handsDic.get(suit).remove("A")
-            self.hand.remove(hand)
-        elif ("10" in cards): 
-            hand = ("10",suit,10)
-            gs.table.append(hand)
-            suitDicJack.update({suit: False})
-            self.handsDic.get(suit).remove("10")
-            self.hand.remove(hand)
-        elif ("Q" in cards): 
-            hand = ("Q",suit,3)
-            gs.table.append(hand)
-            suitDicJack.update({suit: False})
-            self.handsDic.get(suit).remove("Q")
-            self.hand.remove(hand)
-        elif ("K" in cards): 
-            hand = ("K",suit,2)
-            gs.table.append(hand)
-            suitDicJack.update({suit: False})
-            self.handsDic.get(suit).remove("K")
-            self.hand.remove(hand)
-        elif ("7" in cards): 
-            hand = ("7",suit,0)
-            gs.table.append(hand)
-            suitDicJack.update({suit: False})
-            self.handsDic.get(suit).remove("7")
-            self.hand.remove(hand)
-        elif ("8" in cards): 
-            hand = ("8",suit,0)
-            gs.table.append(hand)
-            suitDicJack.update({suit: False})
-            self.handsDic.get(suit).remove("8")
-            self.hand.remove(hand)
+        if (isinstance(cards,list) and len(cards) != 0): 
+            if ("J" in cards): 
+                hand = ("J",suits,30)
+                gs.table.append(hand)
+            #    suitDicJack.update({suit: False})
+                self.handsDic.get(suits).remove("J")
+                self.hand.remove(hand)
+            elif ("9" in cards): 
+                hand = ("9",suits,20)
+                gs.table.append(hand)
+            #    suitDicJack.update({suit: False})
+                self.handsDic.get(suits).remove("9")
+                self.hand.remove(hand)
+            elif ("A" in cards): 
+                hand = ("A",suits,11)
+                gs.table.append(hand)
+            #    suitDicJack.update({suit: False})
+                self.handsDic.get(suits).remove("A")
+                self.hand.remove(hand)
+            elif ("10" in cards): 
+                hand = ("10",suits,10)
+                gs.table.append(hand)
+            #    suitDicJack.update({suit: False})
+                self.handsDic.get(suits).remove("10")
+                self.hand.remove(hand)
+            elif ("Q" in cards): 
+                hand = ("Q",suits,2)
+                gs.table.append(hand)
+            #    suitDicJack.update({suit: False})
+                self.handsDic.get(suits).remove("Q")
+                self.hand.remove(hand)
+            elif ("K" in cards): 
+                hand = ("K",suits,3)
+                gs.table.append(hand)
+            #    suitDicJack.update({suit: False})
+                self.handsDic.get(suits).remove("K")
+                self.hand.remove(hand)
+            elif ("7" in cards): 
+                hand = ("7",suits,0)
+                gs.table.append(hand)
+            #    suitDicJack.update({suits: False})
+                self.handsDic.get(suits).remove("7")
+                self.hand.remove(hand)
+            elif ("8" in cards): 
+                hand = ("8",suits,0)
+                gs.table.append(hand)
+        #       suitDicJack.update({suit: False})
+                self.handsDic.get(suits).remove("8")
+                self.hand.remove(hand)
 
 
 class bigPlayer(Player): 
@@ -226,65 +233,94 @@ class bigPlayer(Player):
 
     # makeMoveBig
     def makeMove(self, gs):
-        current = gs.table[-1]    ## gets the top card on the pile 
-        suit = suit(current)    ## suit of the top card 
+        current = ""
+        suits = ""
+
+        if (len(gs.table) == 0): 
+            hand = ()
+            for s in self.handsDic.keys():
+                if ("J" in self.handsDic.get(s)): 
+                    hand = ("J",s,30)
+                elif ("9" in self.handsDic.get(s)): 
+                    hand = ("9",s,20)
+                elif ("A" in self.handsDic.get(s)): 
+                    hand = ("A",s,11)
+                elif ("10" in self.handsDic.get(s)): 
+                    hand = ("10",s,10)
+                elif ("Q" in self.handsDic.get(s)): 
+                    hand = ("Q",s,2)
+                elif ("K" in self.handsDic.get(s)): 
+                    hand = ("K",s,3)
+                elif ("7" in self.handsDic.get(s)): 
+                    hand = ("7",s,0)
+                elif ("8" in self.handsDic.get(s)): 
+                    hand = ("8",s,0)
+            current = hand 
+            suits = suit(current)
+        
+        else:
+            current = gs.table[-1]    ## gets the top card on the pile 
+            suits = suit(current)    ## suit of the top card
+
+
         suitDic = self.getSuits()
 
-        if (suitDic.get(suit) == 0): #if the player does not have that suit in their hand 
+        if (suitDic.get(suits) == 0): #if the player does not have that suit in their hand 
             if (not gs.trumpIsOpen):     
                 gs.trumpIsOpen = True   ## trump card is now open 
-                suit = self.trumpSuit
+                suits = gs.trumpSuit
             
-        cards = self.handsDic.get(suit)
-
-        if ("J" in cards): 
-            hand = ("J",suit,30)
-            gs.table.append(hand)
-            suitDicJack.update({suit: False})
-            self.handsDic.get(suit).remove("J")
-            self.hand.remove(hand)
-        elif ("9" in cards): 
-            hand = ("9",suit,20)
-            gs.table.append(hand)
-            suitDicJack.update({suit: False})
-            self.handsDic.get(suit).remove("9")
-            self.hand.remove(hand)
-        elif ("A" in cards): 
-            hand = ("A",suit,11)
-            gs.table.append(hand)
-            suitDicJack.update({suit: False})
-            self.handsDic.get(suit).remove("A")
-            self.hand.remove(hand)
-        elif ("10" in cards): 
-            hand = ("10",suit,10)
-            gs.table.append(hand)
-            suitDicJack.update({suit: False})
-            self.handsDic.get(suit).remove("10")
-            self.hand.remove(hand)
-        elif ("Q" in cards): 
-            hand = ("Q",suit,3)
-            gs.table.append(hand)
-            suitDicJack.update({suit: False})
-            self.handsDic.get(suit).remove("Q")
-            self.hand.remove(hand)
-        elif ("K" in cards): 
-            hand = ("K",suit,2)
-            gs.table.append(hand)
-            suitDicJack.update({suit: False})
-            self.handsDic.get(suit).remove("K")
-            self.hand.remove(hand)
-        elif ("7" in cards): 
-            hand = ("7",suit,0)
-            gs.table.append(hand)
-            suitDicJack.update({suit: False})
-            self.handsDic.get(suit).remove("7")
-            self.hand.remove(hand)
-        elif ("8" in cards): 
-            hand = ("8",suit,0)
-            gs.table.append(hand)
-            suitDicJack.update({suit: False})
-            self.handsDic.get(suit).remove("8")
-            self.hand.remove(hand)
+        cards = self.handsDic.get(suits)
+ 
+        if (isinstance(cards,list) and len(cards) != 0): 
+            if ("J" in cards): 
+                hand = ("J",suits,30)
+                gs.table.append(hand)
+        #      suitDicJack.update({suits: False})
+                self.handsDic.get(suits).remove("J")
+                self.hand.remove(hand)
+            elif ("9" in cards): 
+                hand = ("9",suits,20)
+                gs.table.append(hand)
+        #      suitDicJack.update({suits: False})
+                self.handsDic.get(suits).remove("9")
+                self.hand.remove(hand)
+            elif ("A" in cards): 
+                hand = ("A",suits,11)
+                gs.table.append(hand)
+        #      suitDicJack.update({suits: False})
+                self.handsDic.get(suits).remove("A")
+                self.hand.remove(hand)
+            elif ("10" in cards): 
+                hand = ("10",suits,10)
+                gs.table.append(hand)
+        #      suitDicJack.update({suits: False})
+                self.handsDic.get(suits).remove("10")
+                self.hand.remove(hand)
+            elif ("Q" in cards): 
+                hand = ("Q",suits,2)
+                gs.table.append(hand)
+        #       suitDicJack.update({suits: False})
+                self.handsDic.get(suits).remove("Q")
+                self.hand.remove(hand)
+            elif ("K" in cards): 
+                hand = ("K",suits,3)
+                gs.table.append(hand)
+        #       suitDicJack.update({suits: False})
+                self.handsDic.get(suits).remove("K")
+                self.hand.remove(hand)
+            elif ("7" in cards): 
+                hand = ("7",suits,0)
+                gs.table.append(hand)
+        #       suitDicJack.update({suits: False})
+                self.handsDic.get(suits).remove("7")
+                self.hand.remove(hand)
+            elif ("8" in cards): 
+                hand = ("8",suits,0)
+                gs.table.append(hand)
+        #       suitDicJack.update({suits: False})
+                self.handsDic.get(suits).remove("8")
+                self.hand.remove(hand)
     
 
 class MajSmallPlayer(smallPlayer):
@@ -764,9 +800,10 @@ class GameState:
 
 
 class GameManager:
-    def __init__(self, verbose=False):
+    def __init__(self, players, verbose=False):
         # self.players = [MajSmallPlayer(), MajSmallPlayer(), MajSmallPlayer(), MajSmallPlayer()]
-        self.players = [TestPlayer(), TestPlayer(), TestPlayer(), TestPlayer()]
+        # self.players = [TestPlayer(), TestPlayer(), TestPlayer(), TestPlayer()]
+        self.players = players
         for i in range(4):
             self.players[i].name = PLAYER_NAMES[i]
         self.verbose = verbose
@@ -774,7 +811,6 @@ class GameManager:
         self.scoreboard = [[],[]]  # a 2-D array with two rows and lots of columns
                                    # to store the outcome of each game for eventual
                                    # data analysis.
-
 
     def newGameState(self):
         gs = GameState()
@@ -905,23 +941,61 @@ def running_averages(ts):  # given a time series, compute the running average me
 
 
 ## EXPERIMENT PHASE 1: which strategy performs the best?
-# TODO
-#
-#
+
+## comparing different strategies together 
+
+# comparing small and big moves 
+## Majority Bidding and Small Moves with Majority Bidding and Big Moves
+playersMSMB = [MajSmallPlayer(), MajBigPlayer(), MajSmallPlayer(), MajBigPlayer()]
+## Top Bidding and Small Moves with Top Bidding and Big Moves 
+playersTSTB = [TopSmallPlayer(), TopBigPlayer(), TopSmallPlayer(), TopBigPlayer()]
+## Value Bidding and Small Moves with Value Bidding and Big Moves 
+playersVSVB = [ValueSmallPlayer(), ValueBigPlayer(), ValueSmallPlayer(), ValueBigPlayer()]
+
+# comparing each of the bidding strategies  
+## Majority Bidding and Small Moves with Top Bidding and Small Moves
+playersMSTS = [MajSmallPlayer(), TopSmallPlayer(), MajSmallPlayer(), TopSmallPlayer()] 
+## Majority Bidding and Small Moves with Value Bidding and Small Moves 
+playersMSVS = [MajSmallPlayer(), ValueSmallPlayer(), MajSmallPlayer(), ValueSmallPlayer()]
+## Top Bidding and Small Moves with Value Bidding and Small Moves
+playersTSVS = [TopSmallPlayer(), ValueSmallPlayer(), TopSmallPlayer(), ValueSmallPlayer()] 
+
+## Majority Bidding and Big Moves with Top Bidding and Big Moves
+playersMBTB = [MajBigPlayer(), TopBigPlayer(), MajBigPlayer(), TopBigPlayer()] 
+## Majority Bidding and Big Moves with Value Bidding and Big Moves
+playersMBVB = [MajBigPlayer(), ValueBigPlayer(), MajBigPlayer(), ValueBigPlayer()] 
+## Top Bidding and Big Moves with Value Bidding and Big Moves
+playersTBVB = [TopBigPlayer(), ValueBigPlayer(), TopBigPlayer(), MajBigPlayer()] 
+
+# Majority Bidding and Small Moves with Top Bidding and Big Moves
+playersMSTS = [MajSmallPlayer(), TopBigPlayer(), MajSmallPlayer(), TopBigPlayer()] 
+## Majority Bidding and Small Moves with Value Bidding and Big Moves 
+playersMSVS = [MajSmallPlayer(), ValueBigPlayer(), MajSmallPlayer(), ValueBigPlayer()]
+## Top Bidding and Small Moves with Value Bidding and Big Moves
+playersTSVS = [TopSmallPlayer(), ValueBigPlayer(), TopSmallPlayer(), ValueBigPlayer()] 
+
+# Majority Bidding and Big Moves with Top Bidding and Small Moves
+playersMSTS = [MajBigPlayer(), TopSmallPlayer(), MajBigPlayer(), TopSmallPlayer()] 
+## Majority Bidding and Big Moves with Value Bidding and Small Moves 
+playersMSVS = [MajBigPlayer(), ValueSmallPlayer(), MajBigPlayer(), ValueSmallPlayer()]
+## Top Bidding and Big Moves with Value Bidding and Small Moves
+playersTSVS = [TopBigPlayer(), ValueSmallPlayer(), TopBigPlayer(), ValueSmallPlayer()] 
+
+allPlayerStrategies = [playersMSMB,playersTSTB,playersVSVB,playersMSTS,playersMSVS,playersTSVS,
+playersMBTB,playersMBVB,playersTBVB,playersMSTS,playersMSVS,playersTSVS,playersMSTS,playersMSVS,playersTSVS]
 
 ## EXPERIMENT PHASE 2: let's dig deeper into one particular strategy.
 N_GAMES = 5000
-
 N_EXPERIMENTS = 10
 
-"""
-gm = GameManager()
+gm = GameManager([MajBigPlayer(), MajSmallPlayer(), MajBigPlayer(), MajSmallPlayer()])
 for i in range(N_GAMES):
     gm.runGame()
 transactions = computeTransactions(gm.scoreboard)  # number of tokens team 1 receives in each game
 expected_outcome = sum(transactions)/N_GAMES
 print(f"Expected outcome: {expected_outcome}")
 
+"""
 
 ## Plot the convergence
 for i in range(N_EXPERIMENTS):
@@ -947,7 +1021,6 @@ plt.title("Empirical distribution of outcomes for Team 1", fontsize=16)
 plt.xlabel("Possible outcome", fontsize=14)
 plt.ylabel("Empirical Probability", fontsize=14)
 plt.show()
-
 
 
 ## Plot a continuous histogram of average outcomes
