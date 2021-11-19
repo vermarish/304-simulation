@@ -138,9 +138,9 @@ class smallPlayer(Player):
         current = ""    ## gets the top card on the pile 
         suits = ""    ## suit of the top card
         
-        if (len(gs.table) == 0):  #checks to see if a card has been played
+        if (len(gs.table) == 0):  #if a card has not been played on the table 
             hand = ()     
-            # 
+            # goes through each of the cards in a players hand to use the smallest card 
             for s in self.handsDic.keys():
                 if ("8" in self.handsDic.get(s)): 
                     hand = ("8",s,0)
@@ -165,7 +165,7 @@ class smallPlayer(Player):
             current = gs.table[-1]    ## gets the top card on the pile 
             suits = suit(current)    ## suit of the top card
 
-        suitDic = self.getSuits()
+        suitDic = self.getSuits()  
          
 
         if (suitDic.get(suits) == 0): #if the player does not have that suit in their hand 
@@ -173,71 +173,66 @@ class smallPlayer(Player):
                 gs.trumpIsOpen = True   ## trump card is now open 
                 suits = gs.trumpSuit
 
+                # if the player doesn't have the suit or the trump suit in their hand 
                 if (suitDic.get(suits) == 0): 
-                    if (suitDic.get("H") == 0):
+                    if (not suitDic.get("H") == 0): 
                         suits = "H"
-                    if (suitDic.get("D") == 0):
+                    elif (not suitDic.get("D") == 0):
                         suits = "D"
-                    if (suitDic.get("C") == 0):
+                    elif (not suitDic.get("C") == 0):
                         suits = "C"
-                    if (suitDic.get("S") == 0):
+                    elif (not suitDic.get("S") == 0):
                         suits = "S"
                                 
-            
+        # gets the cards in a player's hands     
         cards = self.handsDic.get(suits)
        
-
+        # if the player's hand isn't empty 
         if (isinstance(cards,list) and len(cards) != 0): 
-            if ("J" in cards): 
-                hand = ("J",suits,30)
+            # goes through in order of rank, playing smaller cards with more preference 
+            if ("8" in cards): 
+                hand = ("8",suits,0)
                 gs.table.append(hand)
-            #    suitDicJack.update({suit: False})
-                self.handsDic.get(suits).remove("J")
-                self.hand.remove(hand)
-            elif ("9" in cards): 
-                hand = ("9",suits,20)
-                gs.table.append(hand)
-            #    suitDicJack.update({suit: False})
-                self.handsDic.get(suits).remove("9")
-                self.hand.remove(hand)
-            elif ("A" in cards): 
-                hand = ("A",suits,11)
-                gs.table.append(hand)
-            #    suitDicJack.update({suit: False})
-                self.handsDic.get(suits).remove("A")
-                self.hand.remove(hand)
-            elif ("10" in cards): 
-                hand = ("10",suits,10)
-                gs.table.append(hand)
-            #    suitDicJack.update({suit: False})
-                self.handsDic.get(suits).remove("10")
-                self.hand.remove(hand)
-            elif ("Q" in cards): 
-                hand = ("Q",suits,2)
-                gs.table.append(hand)
-            #    suitDicJack.update({suit: False})
-                self.handsDic.get(suits).remove("Q")
-                self.hand.remove(hand)
-            elif ("K" in cards): 
-                hand = ("K",suits,3)
-                gs.table.append(hand)
-            #    suitDicJack.update({suit: False})
-                self.handsDic.get(suits).remove("K")
+                self.handsDic.get(suits).remove("8")
                 self.hand.remove(hand)
             elif ("7" in cards): 
                 hand = ("7",suits,0)
                 gs.table.append(hand)
-            #    suitDicJack.update({suits: False})
                 self.handsDic.get(suits).remove("7")
                 self.hand.remove(hand)
-            elif ("8" in cards): 
-                hand = ("8",suits,0)
+             elif ("K" in cards): 
+                hand = ("K",suits,3)
                 gs.table.append(hand)
-        #       suitDicJack.update({suit: False})
-                self.handsDic.get(suits).remove("8")
+                self.handsDic.get(suits).remove("K")
                 self.hand.remove(hand)
-
-
+            elif ("Q" in cards): 
+                hand = ("Q",suits,2)
+                gs.table.append(hand)
+                self.handsDic.get(suits).remove("Q")
+                self.hand.remove(hand)
+            elif ("10" in cards): 
+                hand = ("10",suits,10)
+                gs.table.append(hand)
+                self.handsDic.get(suits).remove("10")
+                self.hand.remove(hand)
+            elif ("A" in cards): 
+                hand = ("A",suits,11)
+                gs.table.append(hand)
+                self.handsDic.get(suits).remove("A")
+                self.hand.remove(hand)
+            elif ("9" in cards): 
+                hand = ("9",suits,20)
+                gs.table.append(hand)
+                self.handsDic.get(suits).remove("9")
+                self.hand.remove(hand)
+            elif ("J" in cards): 
+                hand = ("J",suits,30)
+                gs.table.append(hand)
+                self.handsDic.get(suits).remove("J")
+                self.hand.remove(hand)
+            
+           
+''' class that has a player playing only the big move strategy'''
 class bigPlayer(Player): 
     def __init__(self):
         super().__init__()
@@ -247,8 +242,9 @@ class bigPlayer(Player):
         current = ""
         suits = ""
 
-        if (len(gs.table) == 0): 
+        if (len(gs.table) == 0): ##if no card is on the table yet 
             hand = ()
+            ## goes through the hand, getting the largest card from the suits and using that as the hand to play
             for s in self.handsDic.keys():
                 if ("J" in self.handsDic.get(s)): 
                     hand = ("J",s,30)
@@ -281,29 +277,29 @@ class bigPlayer(Player):
                 gs.trumpIsOpen = True   ## trump card is now open 
                 suits = gs.trumpSuit
 
+                # checks to see which suits are remaining in the hand if hand doesn't have trump suit or current suit 
                 if (suitDic.get(suits) == 0): 
-                    if (suitDic.get("H") == 0):
+                    if (not suitDic.get("H") == 0):
                         suits = "H"
-                    if (suitDic.get("D") == 0):
+                    if (not suitDic.get("D") == 0):
                         suits = "D"
-                    if (suitDic.get("C") == 0):
+                    if (not suitDic.get("C") == 0):
                         suits = "C"
-                    if (suitDic.get("S") == 0):
+                    if (not suitDic.get("S") == 0):
                         suits = "S"
-                                
+
+        # gets cards in hand           
         cards = self.handsDic.get(suits)
  
         if (isinstance(cards,list) and len(cards) != 0): 
             if ("J" in cards): 
                 hand = ("J",suits,30)
                 gs.table.append(hand)
-        #      suitDicJack.update({suits: False})
                 self.handsDic.get(suits).remove("J")
                 self.hand.remove(hand)
             elif ("9" in cards): 
                 hand = ("9",suits,20)
                 gs.table.append(hand)
-        #      suitDicJack.update({suits: False})
                 self.handsDic.get(suits).remove("9")
                 self.hand.remove(hand)
             elif ("A" in cards): 
@@ -315,31 +311,26 @@ class bigPlayer(Player):
             elif ("10" in cards): 
                 hand = ("10",suits,10)
                 gs.table.append(hand)
-        #      suitDicJack.update({suits: False})
                 self.handsDic.get(suits).remove("10")
                 self.hand.remove(hand)
             elif ("Q" in cards): 
                 hand = ("Q",suits,2)
                 gs.table.append(hand)
-        #       suitDicJack.update({suits: False})
                 self.handsDic.get(suits).remove("Q")
                 self.hand.remove(hand)
             elif ("K" in cards): 
                 hand = ("K",suits,3)
                 gs.table.append(hand)
-        #       suitDicJack.update({suits: False})
                 self.handsDic.get(suits).remove("K")
                 self.hand.remove(hand)
             elif ("7" in cards): 
                 hand = ("7",suits,0)
                 gs.table.append(hand)
-        #       suitDicJack.update({suits: False})
                 self.handsDic.get(suits).remove("7")
                 self.hand.remove(hand)
             elif ("8" in cards): 
                 hand = ("8",suits,0)
                 gs.table.append(hand)
-        #       suitDicJack.update({suits: False})
                 self.handsDic.get(suits).remove("8")
                 self.hand.remove(hand)
     
@@ -502,263 +493,6 @@ class ValueBigPlayer(bigPlayer):
             return 180, maxSuit
         else: 
             return 210, maxSuit
-
-
-
-    # choose the hand with the largest number of rank of a certain number 
-    # if no majority in hand -- bet 160 
-    # if 3 out of four cards in hand are one trump suit -- bet 180 
-    # if 4 out of four cards in hand are one trump suit -- bet 210 
-
-    
-    # def makeFirstBidMaj(self): 
-    #     suitDic = getSuits()
-
-    #     maxSuit = max(suitDic, key=suitDic.get)
-    #     if (suitDic.get(maxSuit) <= 2):
-    #         return 160, maxSuit
-    #     elif (suitDic.get(maxSuit) == 3): 
-    #         return 180, maxSuit
-    #     else: 
-    #         return 210, maxSuit
-
-    
-    # def makeFirstBidTop(self): 
-    #     suitDic = getSuits() 
-
-    #     suitDicJack = {"H": False, "D": False, "S": False, "C": False}   #whether there is a jack of the trump suit in the hand 
-    #     suitDicNine = {"H": False, "D": False, "S": False, "C": False}   #whether there is a nine of the trump suit in the hand 
-    #     suitDicAce = {"H": False, "D": False, "S": False, "C": False}    #whether there is a ace of the trump suit in the hand
-
-    #     for suit in suits: 
-    #         if("J" in self.handsDic.get(suit)): 
-    #             suitDicJack.update({suit: True})
-    #         elif ("9" in self.handsDic.get(suit)):
-    #             suitDicNine.update({suit: True})
-    #         elif ("A" in self.handsDic.get(suit)):
-    #             suitDicAce.update({suit: True}) 
-
-
-    #     maxSuit = max(suitDic, key=suitDic.get)
-
-    #     if (suitDicJack.get(maxSuit) == True and suitDicNine.get(maxSuit) == True and suitDicAce.get(maxSuit) == True): 
-    #         return 230, maxSuit
-    #     elif (suitDicJack.get(maxSuit) == True and suitDicNine.get(maxSuit) == True): 
-    #         return 210, maxSuit 
-    #     elif (suitDicJack.get(maxSuit) == True and suitDicAce.get(maxSuit) == True): 
-    #         return 180, maxSuit
-    #     else: 
-    #         return 160, maxSuit 
-
-
-    # def makeFirstBidValue(self):
-    #     suitDic =  getSuits()
-    #     maxSuit = max(suitDic, key=suitDic.get)
-        
-    #     if (suitDic.get(maxSuit) == 1): 
-    #         return 160, maxSuit
-
-
-    #     v = value(self.hand)
-
-    #     if (v <= 30): 
-    #         return 160, maxSuit
-    #     elif (1 <= v <= 3): 
-    #         return 180, maxSuit
-    #     else: 
-    #         return 210, maxSuit
-    
-
-   # def makeFirstBid(self):
-
-    
-    """TODO -- don't need because we handle it in bid function 
-    def pickTrump(self):
-        # TODO write an external function for this.
-        pass
-    """
-
-
-    # def makeMoveSmall(self, gs):
-    #     current = gs.table[-1]    ## gets the top card on the pile 
-    #     suit = suit(current)    ## suit of the top card 
-    #     suitDic = getSuits()   
-         
-
-    #     # suitDicJack = {"H": False, "D": False, "S": False, "C": False}   #whether there is a jack of the trump suit in the hand 
-    #     # suitDicNine = {"H": False, "D": False, "S": False, "C": False}   #whether there is a nine of the trump suit in the hand 
-    #     # suitDicAce = {"H": False, "D": False, "S": False, "C": False}    #whether there is a ace of the trump suit in the hand
-    #     # suitDicTen = {"H": False, "D": False, "S": False, "C": False}   #whether there is a jack of the trump suit in the hand 
-    #     # suitDicQueen = {"H": False, "D": False, "S": False, "C": False}   #whether there is a nine of the trump suit in the hand 
-    #     # suitDicKing = {"H": False, "D": False, "S": False, "C": False}    #whether there is a ace of the trump suit in the hand
-    #     # suitDicSeven = {"H": False, "D": False, "S": False, "C": False}   #whether there is a nine of the trump suit in the hand 
-    #     # suitDicEight = {"H": False, "D": False, "S": False, "C": False}    #whether there is a ace of the trump suit in the hand
-
-    #     # for hand in self.hand: 
-    #     #     s = suit(hand)
-    #     #     if (s == "J"):
-    #     #         suitDicJack.update({r: True})
-    #     #     elif (s == "9")
-    #     #         suitDicNine.update({r: True})
-    #     #     elif (s = "A"):
-    #     #         suitDicAce.update({r: True})
-    #     #     elif (s = "10"): 
-    #     #         suitDicTen.update({r: True})
-    #     #     elif (s = "K"):
-    #     #         suitDicKing.update({r: True})
-    #     #     elif (s = "Q"):
-    #     #         suitDicQueen.update({r: True})
-    #     #     elif (s = "8"):
-    #     #         suitDicEight.update({r: True})
-    #     #     elif (s = "7"):
-    #     #         suitDicSeven.update({r: True})
-
-    #     if (suitDic.get(suit) == 0): #if the player does not have that suit in their hand 
-    #         if (not gs.trumpIsOpen):     
-    #             gs.trumpIsOpen = True   ## trump card is now open 
-    #             suit = self.trumpSuit
-            
-    #     cards = self.handsDic.get(suit)
-
-    #     if ("J" in cards): 
-    #         hand = ("J",suit,30)
-    #         gs.table.append(hand)
-    #         suitDicJack.update({suit: False})
-    #         self.handsDic.get(suit).remove("J")
-    #         self.hand.remove(hand)
-    #     elif ("9" in cards): 
-    #         hand = ("9",suit,20)
-    #         gs.table.append(hand)
-    #         suitDicJack.update({suit: False})
-    #         self.handsDic.get(suit).remove("9")
-    #         self.hand.remove(hand)
-    #     elif ("A" in cards): 
-    #         hand = ("A",suit,11)
-    #         gs.table.append(hand)
-    #         suitDicJack.update({suit: False})
-    #         self.handsDic.get(suit).remove("A")
-    #         self.hand.remove(hand)
-    #     elif ("10" in cards): 
-    #         hand = ("10",suit,10)
-    #         gs.table.append(hand)
-    #         suitDicJack.update({suit: False})
-    #         self.handsDic.get(suit).remove("10")
-    #         self.hand.remove(hand)
-    #     elif ("Q" in cards): 
-    #         hand = ("Q",suit,3)
-    #         gs.table.append(hand)
-    #         suitDicJack.update({suit: False})
-    #         self.handsDic.get(suit).remove("Q")
-    #         self.hand.remove(hand)
-    #     elif ("K" in cards): 
-    #         hand = ("K",suit,2)
-    #         gs.table.append(hand)
-    #         suitDicJack.update({suit: False})
-    #         self.handsDic.get(suit).remove("K")
-    #         self.hand.remove(hand)
-    #     elif ("7" in cards): 
-    #         hand = ("7",suit,0)
-    #         gs.table.append(hand)
-    #         suitDicJack.update({suit: False})
-    #         self.handsDic.get(suit).remove("7")
-    #         self.hand.remove(hand)
-    #     elif ("8" in cards): 
-    #         hand = ("8",suit,0)
-    #         gs.table.append(hand)
-    #         suitDicJack.update({suit: False})
-    #         self.handsDic.get(suit).remove("8")
-    #         self.hand.remove(hand)
-
-
-    # def makeMoveBig(self, gs): 
-    #     current = gs.table[-1]    ## gets the top card on the pile 
-    #     suit = suit(current)    ## suit of the top card 
-    #     suitDic = getSuits()   
-         
-
-    #     # suitDicJack = {"H": False, "D": False, "S": False, "C": False}   #whether there is a jack of the trump suit in the hand 
-    #     # suitDicNine = {"H": False, "D": False, "S": False, "C": False}   #whether there is a nine of the trump suit in the hand 
-    #     # suitDicAce = {"H": False, "D": False, "S": False, "C": False}    #whether there is a ace of the trump suit in the hand
-    #     # suitDicTen = {"H": False, "D": False, "S": False, "C": False}   #whether there is a jack of the trump suit in the hand 
-    #     # suitDicQueen = {"H": False, "D": False, "S": False, "C": False}   #whether there is a nine of the trump suit in the hand 
-    #     # suitDicKing = {"H": False, "D": False, "S": False, "C": False}    #whether there is a ace of the trump suit in the hand
-    #     # suitDicSeven = {"H": False, "D": False, "S": False, "C": False}   #whether there is a nine of the trump suit in the hand 
-    #     # suitDicEight = {"H": False, "D": False, "S": False, "C": False}    #whether there is a ace of the trump suit in the hand
-
-    #     # for hand in self.hand: 
-    #     #     s = suit(hand)
-    #     #     if (s == "J"):
-    #     #         suitDicJack.update({r: True})
-    #     #     elif (s == "9")
-    #     #         suitDicNine.update({r: True})
-    #     #     elif (s = "A"):
-    #     #         suitDicAce.update({r: True})
-    #     #     elif (s = "10"): 
-    #     #         suitDicTen.update({r: True})
-    #     #     elif (s = "K"):
-    #     #         suitDicKing.update({r: True})
-    #     #     elif (s = "Q"):
-    #     #         suitDicQueen.update({r: True})
-    #     #     elif (s = "8"):
-    #     #         suitDicEight.update({r: True})
-    #     #     elif (s = "7"):
-    #     #         suitDicSeven.update({r: True})
-
-    #     if (suitDic.get(suit) == 0): #if the player does not have that suit in their hand 
-    #         if (not gs.trumpIsOpen):     
-    #             gs.trumpIsOpen = True   ## trump card is now open 
-    #             suit = self.trumpSuit
-            
-    #     cards = self.handsDic.get(suit)
-
-    #     if ("J" in cards): 
-    #         hand = ("J",suit,30)
-    #         gs.table.append(hand)
-    #         suitDicJack.update({suit: False})
-    #         self.handsDic.get(suit).remove("J")
-    #         self.hand.remove(hand)
-    #     elif ("9" in cards): 
-    #         hand = ("9",suit,20)
-    #         gs.table.append(hand)
-    #         suitDicJack.update({suit: False})
-    #         self.handsDic.get(suit).remove("9")
-    #         self.hand.remove(hand)
-    #     elif ("A" in cards): 
-    #         hand = ("A",suit,11)
-    #         gs.table.append(hand)
-    #         suitDicJack.update({suit: False})
-    #         self.handsDic.get(suit).remove("A")
-    #         self.hand.remove(hand)
-    #     elif ("10" in cards): 
-    #         hand = ("10",suit,10)
-    #         gs.table.append(hand)
-    #         suitDicJack.update({suit: False})
-    #         self.handsDic.get(suit).remove("10")
-    #         self.hand.remove(hand)
-    #     elif ("Q" in cards): 
-    #         hand = ("Q",suit,3)
-    #         gs.table.append(hand)
-    #         suitDicJack.update({suit: False})
-    #         self.handsDic.get(suit).remove("Q")
-    #         self.hand.remove(hand)
-    #     elif ("K" in cards): 
-    #         hand = ("K",suit,2)
-    #         gs.table.append(hand)
-    #         suitDicJack.update({suit: False})
-    #         self.handsDic.get(suit).remove("K")
-    #         self.hand.remove(hand)
-    #     elif ("7" in cards): 
-    #         hand = ("7",suit,0)
-    #         gs.table.append(hand)
-    #         suitDicJack.update({suit: False})
-    #         self.handsDic.get(suit).remove("7")
-    #         self.hand.remove(hand)
-    #     elif ("8" in cards): 
-    #         hand = ("8",suit,0)
-    #         gs.table.append(hand)
-    #         suitDicJack.update({suit: False})
-    #         self.handsDic.get(suit).remove("8")
-    #         self.hand.remove(hand)
 
 
 class TestPlayer(Player):
