@@ -74,6 +74,7 @@ class Player:
         self.clearHand
         self.giveCards(cards)
 
+    """Count the distribution of the four suits in your hand"""
     def getSuits(self):
         suitDic = {"H": 0, "D": 0, "S": 0, "C": 0}
         for s in suits:
@@ -125,8 +126,8 @@ class smallPlayer(Player):
     def __init__(self):
         super().__init__()
 
-    
-    def makeMoveSmall(self, gs):
+    # makeMoveSmall
+    def makeMove(self, gs):
         current = gs.table[-1]    ## gets the top card on the pile 
         suit = suit(current)    ## suit of the top card
         suitDic = self.getSuits()
@@ -220,7 +221,8 @@ class bigPlayer(Player):
     def __init__(self):
         super().__init__()
 
-    def makeMoveBig(self, gs): 
+    # makeMoveBig
+    def makeMove(self, gs):
         current = gs.table[-1]    ## gets the top card on the pile 
         suit = suit(current)    ## suit of the top card 
         suitDic = self.getSuits()
@@ -709,7 +711,7 @@ class GameState:
     """
     def __init__(self):
         self.table = []
-        self.bids = []  
+        self.bids = []
         self.trumpIsOpen = False
         self.trumpSuit = None
 
@@ -724,6 +726,8 @@ class GameState:
                 points *= 1000  # matching an open trump is valuable.
             elif suit(card) != suit(self.table[0]):
                 points *= 0  # failing to match the suit is useless.
+            elif i == 0:
+                points = 0.01
             arbitraryPoints.append(points)
         return(arbitraryPoints.index(max(arbitraryPoints)))
 
@@ -797,8 +801,8 @@ class GameManager:
 
         # Simplification: Each player comes up with a bid separately,
         # and each team uses the higher bid.
-        teamOneBid = max(self.gs.bids[0], self.gs.bids[2])
-        teamTwoBid = max(self.gs.bids[1], self.gs.bids[3])
+        teamOneBid = max(self.gs.bidVals[0], self.gs.bidVals[2])
+        teamTwoBid = max(self.gs.bidVals[1], self.gs.bidVals[3])
         
 
         # PLAYING
