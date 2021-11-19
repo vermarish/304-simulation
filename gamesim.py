@@ -200,7 +200,7 @@ class smallPlayer(Player):
                 gs.table.append(hand)
                 self.handsDic.get(suits).remove("7")
                 self.hand.remove(hand)
-             elif ("K" in cards): 
+            elif ("K" in cards): 
                 hand = ("K",suits,3)
                 gs.table.append(hand)
                 self.handsDic.get(suits).remove("K")
