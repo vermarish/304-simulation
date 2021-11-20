@@ -291,6 +291,7 @@ class bigPlayer(Player):
         # gets cards in hand           
         cards = self.handsDic.get(suits)
  
+        # goes through in order of rank, playing larger cards with more preference 
         if (isinstance(cards,list) and len(cards) != 0): 
             if ("J" in cards): 
                 hand = ("J",suits,30)
@@ -305,7 +306,6 @@ class bigPlayer(Player):
             elif ("A" in cards): 
                 hand = ("A",suits,11)
                 gs.table.append(hand)
-        #      suitDicJack.update({suits: False})
                 self.handsDic.get(suits).remove("A")
                 self.hand.remove(hand)
             elif ("10" in cards): 
@@ -463,6 +463,8 @@ class ValueSmallPlayer(smallPlayer):
         super().__init__()
 
     # makeBidValue
+
+    # makes big values based on the total sum of the values of the hand
     def makeBid(self):
         suitDic =  self.getSuits()
         maxSuit = max(suitDic, key=suitDic.get)
@@ -475,17 +477,19 @@ class ValueSmallPlayer(smallPlayer):
 
         if (v <= 30): 
             return 160, maxSuit
-        elif (1 <= v <= 3): 
+        elif (30 <= v <= 40): 
             return 180, maxSuit
         else: 
             return 210, maxSuit
    
+
 
 class ValueBigPlayer(bigPlayer):
     def __init__(self):
         super().__init__()
 
     # makeBidValue
+    # makes big values based on the total sum of the values of the hand
     def makeBid(self):
         suitDic =  self.getSuits()
         maxSuit = max(suitDic, key=suitDic.get)
@@ -493,12 +497,11 @@ class ValueBigPlayer(bigPlayer):
         if (suitDic.get(maxSuit) == 1): 
             return 160, maxSuit
 
-
         v = value(self.hand)
 
         if (v <= 30): 
             return 160, maxSuit
-        elif (1 <= v <= 3): 
+        elif (30 <= v <= 40): 
             return 180, maxSuit
         else: 
             return 210, maxSuit
